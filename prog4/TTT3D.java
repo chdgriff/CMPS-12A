@@ -1,0 +1,406 @@
+/*
+ * Assignment #4.
+ * This program creates a game of 4x4x4 tic tac toe and 
+ * allows a user to play against a computer.
+ * This program also allows the user to input a text file to
+ * create a certain situation.
+ * 
+ * 
+ * Author: Chris Griffis <chdgriff@ucsc.edu>
+ * 11/23/16
+ */
+
+import java.io.*;
+import java.util.*;
+
+public class TTT3D {
+	int[][][] board = new int[4][4][4];
+	int[][][] lines = {
+		{{0,0,0},{0,0,1},{0,0,2},{0,0,3}},  //lev 0; row 0   rows in each lev
+		{{0,1,0},{0,1,1},{0,1,2},{0,1,3}},  //       row 1     
+		{{0,2,0},{0,2,1},{0,2,2},{0,2,3}},  //       row 2     
+		{{0,3,0},{0,3,1},{0,3,2},{0,3,3}},  //       row 3     
+		{{1,0,0},{1,0,1},{1,0,2},{1,0,3}},  //lev 1; row 0     
+		{{1,1,0},{1,1,1},{1,1,2},{1,1,3}},  //       row 1     
+		{{1,2,0},{1,2,1},{1,2,2},{1,2,3}},  //       row 2     
+		{{1,3,0},{1,3,1},{1,3,2},{1,3,3}},  //       row 3     
+		{{2,0,0},{2,0,1},{2,0,2},{2,0,3}},  //lev 2; row 0     
+		{{2,1,0},{2,1,1},{2,1,2},{2,1,3}},  //       row 1     
+		{{2,2,0},{2,2,1},{2,2,2},{2,2,3}},  //       row 2       
+		{{2,3,0},{2,3,1},{2,3,2},{2,3,3}},  //       row 3     
+		{{3,0,0},{3,0,1},{3,0,2},{3,0,3}},  //lev 3; row 0     
+		{{3,1,0},{3,1,1},{3,1,2},{3,1,3}},  //       row 1 
+		{{3,2,0},{3,2,1},{3,2,2},{3,2,3}},  //       row 2       
+		{{3,3,0},{3,3,1},{3,3,2},{3,3,3}},  //       row 3           
+		{{0,0,0},{0,1,0},{0,2,0},{0,3,0}},  //lev 0; col 0   cols in each lev
+		{{0,0,1},{0,1,1},{0,2,1},{0,3,1}},  //       col 1    
+		{{0,0,2},{0,1,2},{0,2,2},{0,3,2}},  //       col 2    
+		{{0,0,3},{0,1,3},{0,2,3},{0,3,3}},  //       col 3    
+		{{1,0,0},{1,1,0},{1,2,0},{1,3,0}},  //lev 1; col 0     
+		{{1,0,1},{1,1,1},{1,2,1},{1,3,1}},  //       col 1    
+		{{1,0,2},{1,1,2},{1,2,2},{1,3,2}},  //       col 2    
+		{{1,0,3},{1,1,3},{1,2,3},{1,3,3}},  //       col 3    
+		{{2,0,0},{2,1,0},{2,2,0},{2,3,0}},  //lev 2; col 0     
+		{{2,0,1},{2,1,1},{2,2,1},{2,3,1}},  //       col 1    
+		{{2,0,2},{2,1,2},{2,2,2},{2,3,2}},  //       col 2    
+		{{2,0,3},{2,1,3},{2,2,3},{2,3,3}},  //       col 3    
+		{{3,0,0},{3,1,0},{3,2,0},{3,3,0}},  //lev 3; col 0     
+		{{3,0,1},{3,1,1},{3,2,1},{3,3,1}},  //       col 1
+		{{3,0,2},{3,1,2},{3,2,2},{3,3,2}},  //       col 2
+		{{3,0,3},{3,1,3},{3,2,3},{3,3,3}},  //       col 3
+	        {{0,0,0},{1,0,0},{2,0,0},{3,0,0}},  //cols in vert plane in front
+	        {{0,0,1},{1,0,1},{2,0,1},{3,0,1}},
+	        {{0,0,2},{1,0,2},{2,0,2},{3,0,2}},
+	        {{0,0,3},{1,0,3},{2,0,3},{3,0,3}},
+	        {{0,1,0},{1,1,0},{2,1,0},{3,1,0}},  //cols in vert plane one back
+	        {{0,1,1},{1,1,1},{2,1,1},{3,1,1}},
+	        {{0,1,2},{1,1,2},{2,1,2},{3,1,2}},
+	        {{0,1,3},{1,1,3},{2,1,3},{3,1,3}},
+	        {{0,2,0},{1,2,0},{2,2,0},{3,2,0}},  //cols in vert plane two back
+	        {{0,2,1},{1,2,1},{2,2,1},{3,2,1}},
+	        {{0,2,2},{1,2,2},{2,2,2},{3,2,2}},
+	        {{0,2,3},{1,2,3},{2,2,3},{3,2,3}},
+	        {{0,3,0},{1,3,0},{2,3,0},{3,3,0}},  //cols in vert plane in rear
+	        {{0,3,1},{1,3,1},{2,3,1},{3,3,1}},
+	        {{0,3,2},{1,3,2},{2,3,2},{3,3,2}},
+	        {{0,3,3},{1,3,3},{2,3,3},{3,3,3}},
+	    {{0,0,0},{0,1,1},{0,2,2},{0,3,3}},  //diags in lev 0
+		{{0,3,0},{0,2,1},{0,1,2},{0,0,3}},
+		{{1,0,0},{1,1,1},{1,2,2},{1,3,3}},  //diags in lev 1
+	    {{1,3,0},{1,2,1},{1,1,2},{1,0,3}},
+	    {{2,0,0},{2,1,1},{2,2,2},{2,3,3}},  //diags in lev 2
+	    {{2,3,0},{2,2,1},{2,1,2},{2,0,3}},
+	    {{3,0,0},{3,1,1},{3,2,2},{3,3,3}},  //diags in lev 3
+	    {{3,3,0},{3,2,1},{3,1,2},{3,0,3}},
+	        {{0,0,0},{1,0,1},{2,0,2},{3,0,3}},  //diags in vert plane in front
+	        {{3,0,0},{2,0,1},{1,0,2},{0,0,3}},
+	        {{0,1,0},{1,1,1},{2,1,2},{3,1,3}},  //diags in vert plane one back
+	        {{3,1,0},{2,1,1},{1,1,2},{0,1,3}},
+	        {{0,2,0},{1,2,1},{2,2,2},{3,2,3}},  //diags in vert plane two back
+	        {{3,2,0},{2,2,1},{1,2,2},{0,2,3}},
+	        {{0,3,0},{1,3,1},{2,3,2},{3,3,3}},  //diags in vert plane in rear
+	        {{3,3,0},{2,3,1},{1,3,2},{0,3,3}},
+        {{0,0,0},{1,1,0},{2,2,0},{3,3,0}},  //diags left slice      
+        {{3,0,0},{2,1,0},{1,2,0},{0,3,0}},        
+        {{0,0,1},{1,1,1},{2,2,1},{3,3,1}},  //diags slice one to right
+        {{3,0,1},{2,1,1},{1,2,1},{0,3,1}},        
+        {{0,0,2},{1,1,2},{2,2,2},{3,3,2}},  //diags slice two to right      
+        {{3,0,2},{2,1,2},{1,2,2},{0,3,2}},        
+        {{0,0,3},{1,1,3},{2,2,3},{3,3,3}},  //diags right slice      
+        {{3,0,3},{2,1,3},{1,2,3},{0,3,3}},        
+	        {{0,0,0},{1,1,1},{2,2,2},{3,3,3}},  //cube vertex diags
+	        {{3,0,0},{2,1,1},{1,2,2},{0,3,3}},
+	        {{0,3,0},{1,2,1},{2,1,2},{3,0,3}},
+	        {{3,3,0},{2,2,1},{1,1,2},{0,0,3}}      
+	};
+	int[] sums = new int[76];
+	ArrayList<Integer> list = new ArrayList<Integer>();//Hold a random order of numbers 0-3
+	boolean userMove;//Determines whose turn it is
+	//Holds all the winning value locations
+	ArrayList<Integer> winZ = new ArrayList<Integer>(), winY = new ArrayList<Integer>(), winX = new ArrayList<Integer>();
+	
+	public static void main(String[] args) throws FileNotFoundException {
+		TTT3D game = new TTT3D();
+		int x, y, z, val;
+		
+		//inputs values if there is a sample txt file
+		if (args.length == 1) {
+			Scanner in = new Scanner(new FileInputStream(args[0]));
+			
+			int lines = in.nextInt();
+			in.nextLine();
+			in.nextLine();
+
+			for (int i = 0; i < lines; i++) {
+				z = in.nextInt();
+				y = in.nextInt();
+				x = in.nextInt();
+				val = in.nextInt();
+				//Test print to print inputed values
+				//System.out.println("board[" + z +"][" + y + "][" + x + "] " + val);
+				game.move(z, y, x, val);
+			}
+			in.close();
+			//game.printBoard();
+		}
+		game.runGame();
+	}
+	
+	//prints board with all markers. If printing the winning board, prints wining line as uppercase.
+	public void printBoard() {
+		boolean printed = true;
+		//loops through whole board
+		for(int z = 3; z >= 0; z--) {
+			for(int y = 3; y >= 0; y--) {
+				for(int i = y; i > 0; i--) {
+					System.out.print(" ");
+				}
+				System.out.print(z + "" + y + " ");//prints level and row label
+				
+				for(int x = 0; x < 4; x++) {
+					printed = false;
+					if (checkWin()) {
+						//loops through winning locations
+						for (int i2 = 0; i2 < 4; i2++) {
+	
+							if (z == winZ.get(i2) && y == winY.get(i2) && x == winX.get(i2)) {
+								//prints capital markers
+								if (board[z][y][x] == 5)
+								{
+									System.out.print("O ");
+								}
+								else if (board[z][y][x] == 1) {
+									System.out.print("X ");
+								}
+								printed = true;
+							}
+						}
+						if (!printed) {
+							//prints various markers
+							if (board[z][y][x] == 5)
+							{
+								System.out.print("o ");
+							}
+							else if (board[z][y][x] == 1) {
+								System.out.print("x ");
+							}
+							else {
+								System.out.print("- ");
+							}
+						}
+					}
+					else {
+						//prints various markers when not winning move
+						if (board[z][y][x] == 5)
+						{
+							System.out.print("o ");
+						}
+						else if (board[z][y][x] == 1) {
+							System.out.print("x ");
+						}
+						else {
+							System.out.print("- ");
+						}
+					}
+				}
+				System.out.println();
+			}
+			System.out.println();
+		}
+		System.out.print("   0 1 2 3\n");
+	}
+	
+	//places value on board
+	public void move(int z, int y, int x, int val) {
+		board[z][y][x] = val;
+	}
+	
+	//Searches for a line from the input
+	public void compMove(int sum) {
+		int x = 0, y = 0, z = 0, i = 0;
+		
+		//checks the if already moved
+		if (!userMove) {
+			if (sum == 0) {
+				//searches for a random location that is empty
+				do {
+					i = (int) (Math.random() * 76);
+				} while (sums[i] != 0);
+				
+				z = lines[i][list.get(0)][0];
+				y = lines[i][list.get(0)][1];
+				x = lines[i][list.get(0)][2];
+				
+				userMove = true;
+				move(z, y, x, 1);
+			}
+			else {
+				//searches for the first instance of a line
+				while (i < 76) {
+					if (sums[i] == sum) {
+						for (int i2: list) {
+							if (ifEmpty(lines[i][i2][0], lines[i][i2][1], lines[i][i2][2])) {
+								z = lines[i][i2][0];
+								y = lines[i][i2][1];
+								x = lines[i][i2][2];
+								
+								userMove = true;
+								move(z, y, x, 1);
+								break;
+							}
+						}
+						break;
+					}
+					else {
+						i++;
+					}
+				}
+			}
+		}
+	}
+	
+	//Searches for a location to create a fork or prevent a fork
+	//num parameter is to either create or prevent fork.
+	public int fork(int num) {
+		int row3;//var to hold all lines of 3 markers
+		
+		//checks if already moved
+		if (!userMove) {
+			for (int z = 0; z < 4; z++) {
+				for (int y = 0; y < 4; y++) {
+					for (int x = 0; x < 4; x++) {
+						if (ifEmpty(z, y, x)) {
+							
+							//sets total lines of 3 to zero and then places a test marker 
+							row3 = 0;
+							move(z, y, x, num);
+							findSums();
+							
+							//finds total count of lines 3 after new value
+							for (int i = 0; i < 76; i++) {
+								if (sums[i] == num * 3)
+									row3++;
+							}
+							//if a fork place computer marker and return out of method
+							if (row3 == 2) {
+								move(z, x, y, 1);
+								userMove = true;
+								return 0;	
+							}
+							//otherwise remove test marker
+							else {
+								move(z, y, x, 0);
+							}
+						}
+					}
+				}
+			}
+		}
+		return 0;
+	}
+	
+	//finds all sums of lines
+	public void findSums() {
+		for (int i = 0; i < 76; i++) {
+			sums[i] = 0;
+			for (int i2 = 0; i2 < 4; i2++) {
+				sums[i] += board[lines[i][i2][0]][lines[i][i2][1]][lines[i][i2][2]];
+			}
+		}
+	}
+	
+	//checks if location is empty
+	public boolean ifEmpty(int z, int y, int x) {
+		if (board[z][y][x] == 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	};
+	
+	//checks if there is a line of 4
+	public boolean checkWin() {
+		for (int i = 0; i < 76; i++) {
+			if (sums[i] == 4 || sums[i] == 20) {
+				//loops to add winning locations to ArrayList list
+				for (int i2 = 0; i2 < 4; i2++) {
+					for (int i3 = 0; i3 < 3; i3++) {
+						switch (i3) {
+							case 0: winZ.add(lines[i][i2][i3]);
+									break;
+							case 1: winY.add(lines[i][i2][i3]);
+									break;
+							case 2: winX.add(lines[i][i2][i3]);
+									break;
+						}
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	//checks if all lines are dead
+	public boolean checkDraw() {
+		for (int i = 0; i < 76; i++) {
+			if (sums[i] == 0 || sums[i] == 1 || sums[i] == 5) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	//runs tic tac toe game with user inputs and computer stategy
+	public void runGame() {
+		//creates variables to accept user input
+		Scanner input = new Scanner(System.in);
+		String inputNum;
+		int z, y, x;
+		
+		//creates list of number 0-3
+		for (int i = 0; i < 4; i++) {
+			list.add(i);
+		}
+		printBoard();
+		
+		//loop to run until someone wins or results in draw
+		while (!checkWin() && !checkDraw()) {
+			
+			//asks for first user input
+			System.out.println("Enter your move(lrc)");
+			inputNum = input.nextLine();
+			z = Character.getNumericValue(inputNum.charAt(0));
+			y = Character.getNumericValue(inputNum.charAt(1));
+			x = Character.getNumericValue(inputNum.charAt(2));
+			
+			//loop to run until valid user input
+			while (!ifEmpty(z, y, x)) {
+				System.out.println("That space is occupied");
+				
+				System.out.println("Enter your move(lev row col)");
+				inputNum = input.nextLine();
+				z = Character.getNumericValue(inputNum.charAt(0));
+				y = Character.getNumericValue(inputNum.charAt(1));
+				x = Character.getNumericValue(inputNum.charAt(2));
+			}
+			
+			move(z, y, x, 5);
+			userMove = false;
+			findSums();
+			
+			//runs computer move if player hasn't won
+			if(!checkWin()) {
+				Collections.shuffle(list);
+				compMove(3);
+				compMove(15);
+				fork(1);
+				fork(5);
+				compMove(10);
+				compMove(2);
+				compMove(1);
+				compMove(0);
+				
+				findSums();
+				printBoard();
+				
+				//printswinning message for computer
+				if(checkWin()) {
+					System.out.println("Haha, Computer won again!");
+				}
+				//checks if a draw
+				else if (checkDraw()) {
+					System.out.println("The game ends is a draw, no one wins");
+				}
+			}
+			//prints winning message for player
+			else {
+				printBoard();
+				System.out.println("You won, congratulations!");
+			}
+		}
+		input.close();
+	}
+}
+
